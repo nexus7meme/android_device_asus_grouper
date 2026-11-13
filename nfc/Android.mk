@@ -29,13 +29,20 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libpn544_fw
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+# The platform HCI stack loads firmware in its system linker namespace.
+LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
+else
 LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/lib
+endif
 LOCAL_SRC_FILES := pn544_fw.c
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS := -Wall -Werror
 
 include $(BUILD_SHARED_LIBRARY)
 
+
+ifeq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
 
 ########################################
 # libnfc_jni for nxp stack
@@ -125,3 +132,5 @@ LOCAL_CERTIFICATE := platform
 LOCAL_INSTRUMENTATION_FOR := NfcNxp
 
 include $(BUILD_PACKAGE)
+
+endif # legacy NFC app definition

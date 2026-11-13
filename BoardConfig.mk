@@ -1,3 +1,6 @@
+ifeq ($(TARGET_PRODUCT),lineage_grouper)
+include device/asus/grouper/lineage/BoardConfig.mk
+else
 # Copyright (C) 2010 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,3 +70,5 @@ PRODUCT_PROPERTY_OVERRIDES += \
      pm.dexopt.shared=quicken
 
 
+
+endif # lineage_grouper

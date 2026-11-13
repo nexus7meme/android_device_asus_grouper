@@ -21,6 +21,10 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/hw
 LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libdl
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+LOCAL_SHARED_LIBRARIES += libbase
+LOCAL_CFLAGS += -DTILAPIA_EARLYSUSPEND
+endif
 LOCAL_SRC_FILES := tegra3_power.cpp nvpowerhal.cpp powerhal_utils.cpp timeoutpoker.cpp
 LOCAL_MODULE := power.grouper
 LOCAL_MODULE_TAGS := optional

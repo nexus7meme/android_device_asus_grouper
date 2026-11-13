@@ -18,7 +18,12 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SHARED_LIBRARIES := liblog libhardware_legacy libgui libbinder libutils
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+LOCAL_SRC_FILES := ../../tilapia/lineage/gps_compat.cpp
+LOCAL_SHARED_LIBRARIES += libsensor libbase
+else
 LOCAL_SRC_FILES := libgpsd-compat.c
+endif
 LOCAL_MODULE := libgpsd-compat
 LOCAL_MODULE_TAGS := optional
 

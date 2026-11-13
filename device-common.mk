@@ -21,7 +21,13 @@ PRODUCT_AAPT_PREF_CONFIG := tvdpi
 # A list of dpis to select prebuilt apk, in precedence order.
 PRODUCT_AAPT_PREBUILT_DPI := hdpi
 
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+# Use Android 11's legacy HIDL provider to wrap the camera HAL1 module.
+TARGET_HAS_LEGACY_CAMERA_HAL1 := false
+PRODUCT_PACKAGES += android.hardware.camera.provider@2.4-service android.hardware.camera.provider@2.4-impl
+else
 TARGET_HAS_LEGACY_CAMERA_HAL1 := true
+endif
 
 PRODUCT_PROPERTY_OVERRIDES := \
     drm.service.enabled=true \
@@ -44,8 +50,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.lmk.critical_upgrade=true \
     ro.lmk.upgrade_pressure=40
 
-# Speed profile services and wifi-service to reduce RAM and storage.
+# Android 11 Tilapia inherits this once from Go defaults. The product variable
+# is a list, so setting it in both parents produces a duplicate compiler token.
+ifeq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
 PRODUCT_SYSTEM_SERVER_COMPILER_FILTER := speed-profile
+endif
 # Always preopt extracted APKs to prevent extracting out of the APK for gms
 # modules.
 PRODUCT_ALWAYS_PREOPT_EXTRACTED_APK := true
@@ -202,6 +211,15 @@ PRODUCT_DEFAULT_WIFI_CHANNELS := 13
 
  $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4330/device-bcm.mk)
 
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+# These Nougat modules are absent or replaced in Android 11.
+PRODUCT_PACKAGES := $(filter-out audio.a2dp.default libemoji dhcpcd.conf PerformanceControl NfcNxp,$(PRODUCT_PACKAGES))
+PRODUCT_PACKAGES += Nfc libnfc_jni
+# Software Keymaster is used; the old Trusty service is not part of this port.
+PRODUCT_PACKAGES := $(filter-out keystore.grouper,$(PRODUCT_PACKAGES))
+PRODUCT_PROPERTY_OVERRIDES := $(filter-out tf.enable=%,$(PRODUCT_PROPERTY_OVERRIDES))
+$(call inherit-product, device/asus/tilapia/lineage/vendor.mk)
+else
 # inherit from the non-open-source side
 $(call inherit-product, vendor/asus/grouper/asus-vendor.mk)
 $(call inherit-product, vendor/broadcom/grouper/broadcom-vendor.mk)
@@ -210,3 +228,9 @@ $(call inherit-product, vendor/invensense/grouper/invensense-vendor.mk)
 $(call inherit-product, vendor/nvidia/grouper/nvidia-vendor.mk)
 $(call inherit-product-if-exists, vendor/widevine/arm-generic/widevine-vendor.mk)
 
+
+endif # lineage_tilapia
+
+ifneq ($(filter lineage_tilapia lineage_grouper,$(TARGET_PRODUCT)),)
+PRODUCT_COPY_FILES += device/asus/tilapia/lineage/gps.conf:$(TARGET_COPY_OUT_VENDOR)/etc/gps.conf
+endif

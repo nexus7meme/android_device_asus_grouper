@@ -218,6 +218,14 @@ void common_power_set_interactive(__attribute__ ((unused)) struct power_module *
     const char* gov = (on == 0)?"intelliactive":"intelliactive";
 
     ALOGI("common_power_open_set_interactive ... ");
+#ifdef TILAPIA_EARLYSUSPEND
+    // Android 11's SystemSuspend writes "mem" on sleep, but disabling
+    // autosuspend does not undo this kernel's legacy early-suspend state.
+    // Resume its input/display callbacks when Android becomes interactive.
+    // Sleep remains under SystemSuspend's wakelock and wakeup-count control.
+    if (on)
+        sysfs_write("/sys/power/state", "on");
+#endif
     sysfs_write("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", gov);
     ALOGI("Setting scaling_governor to %s", gov);
 
